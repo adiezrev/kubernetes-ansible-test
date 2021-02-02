@@ -1,0 +1,21 @@
+---
+
+packages:
+- kubelet
+- kubeadm
+- kubectl
+
+services:
+- kubelet
+
+master_ports:
+- "6443/tcp"
+- "2379-2380/tcp"
+- "10250-10252/tcp"
+- "10255/tcp"
+
+worker_ports:
+- "10250/tcp"
+- "8285/udp"
+- "8472/udp"
+- "30000-32767/tcp"

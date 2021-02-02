@@ -1,7 +1,4 @@
 ---
-
-repo_name: 'devops'
-
+repo_name: 'kubernetes-ansible-test'
 user: 'adiezrev'
-
 target_dir: '/test'

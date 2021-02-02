@@ -1,0 +1,4 @@
+---
+- import_playbook: clonar-git-publico.yaml
+- import_playbook: setup_master_node.yml
+- import_playbook: setup_worker_nodes.yml

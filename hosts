@@ -1,6 +1,9 @@
+[nfs-nodes]
+nfs.acme.es ansible_host=192.168.1.115 ansible_user=jabali ansible_ssh_pass=jabali
+
 [kubernetes-master-nodes]
-kubernetes-master ansible_host=192.168.122.255
+master.acme.es ansible_host=192.168.1.110 ansible_user=jabali ansible_ssh_pass=jabali
 
 [kubernetes-worker-nodes]
-#kubernetes-worker1 ansible_host=
-#kubernetes-worker2 ansible_host=
+worker01.acme.es ansible_host=192.168.1.111 ansible_user=jabali ansible_ssh_pass=jabali
+worker02.acme.es ansible_host=192.168.1.112 ansible_user=jabali ansible_ssh_pass=jabali
