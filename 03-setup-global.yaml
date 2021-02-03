@@ -1,0 +1,62 @@
+---
+- hosts: kubernetes-master-nodes:kubernetes-worker-nodes:fns-nodes
+  become: yes
+  vars_files:
+  - env_var
+  tasks:
+  
+  - name: Pone la IPs a /etc/hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '.*{{ item }}$'
+      line: "{{ hostvars[item].ansible_host }} {{item}}"
+      state: present
+    when: hostvars[item].ansible_host is defined
+    with_items: "{{ groups.all }}"   
+  
+  - name: Activar transparent masquerading para que los PODs puedan comunicarse dentro del cluster mediante VXLAN
+    shell: modprobe br_netfilter
+        
+  - name: Activar transparent masquerading para que los PODs puedan comunicarse dentro del cluster mediante VXLAN (firewall)
+    firewalld:
+    masquerade:
+    state: enabled
+    permanent: yes
+    immediate: yes
+
+  - name: Manejo del trafico del cortafuegos
+    shell: sysctl --system
+        
+  - name: Quitar swap
+    shell: swapoff -a
+
+  - name: Comentando als entradas en in /etc/fstab
+    replace:
+     path: /etc/fstab
+     regexp: '(^/.*swap*)'
+     replace: '# \1'
+
+  - name: Instalamos docker que será el engine para ejecutar contenedores.
+    dnf:
+    name: "{{ packages-docker-engine }}"
+    enablerepo: https://download.docker.com/linux/centos/docker-ce.repo
+    
+ - name: Inicializando los servicios de docker
+    service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+    with_items: "{{ services-docker-engine }}"      
+    
+  - name: Installing required packages
+    dnf:
+    name: "{{ packages }}"
+    disable_excludes:  "{{ packages-disable-excludes }}"
+    state: present
+        
+- name: Inicializando los servicios
+    service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+    with_items: "{{ services }}"   

@@ -2,7 +2,7 @@
 - hosts: kubernetes-master-nodes
   become: yes
   vars_files:
-  - env_var2
+    - "group_vars/env_vars.yaml"
   tasks:
   
   - name: Abre los puertos en el firewall

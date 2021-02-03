@@ -1,0 +1,35 @@
+- hosts: kubernetes-master-nodes:kubernetes-worker-nodes:fns-nodes
+  become: yes
+  vars_files:
+  - group_vars/env_vars
+  tasks:
+  - name: Actualización a ultimo nivel
+    dnf:
+    update_only: yes
+       
+  - name: Configuracion de la sincronizacion horaria
+    shell:  timedatectl set-timezone "{{ time-zone }}"
+    
+  - name: Instalando paquetes basicos
+    dnf:
+    name: "{{ item }}"
+    state: present
+     with_items: "{{ packages-initials }}"  
+    
+  - name: Inicializando servicios basicos
+    service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+    with_items: "{{ services-initials }}"  
+    
+  - name: Configuracion de la sincronizacion horaria
+    shell: timedatectl set-ntp true
+    
+  - name: Se desactiva SELinux
+    shell:
+      sed -i s/=enforcing/=disabled/g /etc/selinux/config
+      
+  - name: Instalanbdo otros paquetes
+    shell:
+      dnf install nfs-utils nfs4-acl-tools wget -y

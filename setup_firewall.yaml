@@ -1,9 +1,14 @@
 ---
-
-- name: Configurar reglas firewall
-  hosts: all
+- hosts: kubernetes-master-nodes
+  become: yes
   vars_files:
-    - "group_vars/env_vars"
-  gather_facts: false
-  roles:
-    - firewall
+    - "group_vars/env_vars.yaml"
+  tasks:
+  
+  - name: Abre los puertos en el firewall
+    firewalld:
+     port: "{{ item }}"
+     state: enabled
+     permanent: yes
+     immediate: yes
+    with_items: "{{ master_ports }}"

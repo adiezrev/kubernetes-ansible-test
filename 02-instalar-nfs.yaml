@@ -1,0 +1,24 @@
+- hosts: nfs-nodes
+  become: yes
+  vars_files:
+  - group_vars/env_vars
+  
+  tasks:
+  - name: Actualización a ultimo nivel
+    shell: 
+       dnf update -y
+  - name: Configuracion de la sincronizacion horaria
+    shell: 
+       timedatectl set-timezone Europe/Madrid
+       dnf install chrony -y
+       systemctl enable chronyd
+       systemctl start chronyd
+       timedatectl set-ntp true
+    
+  - name: Se desactiva SELinux
+    shell:
+      sed -i s/=enforcing/=disabled/g /etc/selinux/config
+      
+  - name: Instalanbdo otros paquetes
+    shell:
+      dnf install nfs-utils nfs4-acl-tools wget -y

@@ -1,9 +1,28 @@
 ---
 
+time-zone:
+- Europe/Madrid
+
+packages-initials:
+- chrony
+
+services-initials:
+- chrony
+
+packages-docker-engine:
+- docker-ce-19.03.14-3.el8 
+- containerd.io
+
+services-docker-engine:
+- docker
+
 packages:
 - kubelet
 - kubeadm
 - kubectl
+
+packages-disable-excludes:
+- kubernetes
 
 services:
 - kubelet

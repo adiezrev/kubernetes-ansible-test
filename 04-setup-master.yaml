@@ -1,0 +1,44 @@
+---
+- hosts: kubernetes-master-nodes
+  become: yes
+  vars_files:
+    - "group_vars/env_vars.yaml"
+  tasks:
+  
+  - name: Abre los puertos en el firewall
+    firewalld:
+     port: "{{ item }}"
+     state: enabled
+     permanent: yes
+     immediate: yes
+    with_items: "{{ master_ports }}"
+    
+  - name: Configuramos kudeadm
+    shell: kubeadm config images pull
+    
+  - name: Configura reglas de acceso en el firewall para los workers
+    firewalld:
+    rich_rule: rule family=ipv4 source address=192.168.1.111/32 accept
+    permanent: yes
+    state: enabled
+    with_items: "{{ master_ports }}"
+    
+    
+    
+     port: "{{ item }}"
+     state: enabled
+     permanent: yes
+     immediate: yes
+    with_items: "{{ master_ports }}"
+    
+    
+    
+    
+    
+    [root@master ~]# firewall-cmd --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.1.111/32 accept'
+success
+[root@master ~]# firewall-cmd --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.1.112/32 accept'
+success
+[root@master ~]# firewall-cmd --reload
+success
+[root@master ~]
