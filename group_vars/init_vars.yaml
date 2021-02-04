@@ -1,0 +1,12 @@
+---
+
+timezone: "Europe/Madrid"
+
+initpackages:
+ - chrony
+ - nfs-utils
+ - nfs4-acl-tools
+ - wget
+
+initservices:
+ - chronyd

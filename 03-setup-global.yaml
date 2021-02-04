@@ -2,7 +2,7 @@
 - hosts: kubernetes-master-nodes:kubernetes-worker-nodes:fns-nodes
   become: yes
   vars_files:
-  - env_var
+  - "group_vars/global_vars.yaml"
   tasks:
   
   - name: Pone la IPs a /etc/hosts
@@ -19,44 +19,49 @@
         
   - name: Activar transparent masquerading para que los PODs puedan comunicarse dentro del cluster mediante VXLAN (firewall)
     firewalld:
-    masquerade:
-    state: enabled
-    permanent: yes
-    immediate: yes
+      masquerade:
+      state: enabled
+      permanent: yes
+      immediate: yes
 
-  - name: Manejo del trafico del cortafuegos
+  - name: Manejo del trafico del cortafuegos de kubernetes
     shell: sysctl --system
         
   - name: Quitar swap
     shell: swapoff -a
 
-  - name: Comentando als entradas en in /etc/fstab
+  - name: Comentando las entradas en in /etc/fstab
     replace:
-     path: /etc/fstab
-     regexp: '(^/.*swap*)'
-     replace: '# \1'
+      path: /etc/fstab
+      regexp: '(^/.*swap*)'
+      replace: '# \1'
 
   - name: Instalamos docker que será el engine para ejecutar contenedores.
     dnf:
-    name: "{{ packages-docker-engine }}"
-    enablerepo: https://download.docker.com/linux/centos/docker-ce.repo
+      name: "{{ packages_docker_engine }}"
+      enablerepo: "{{ repo }}"
+      state: latest
+      allowerasing: yes
     
  - name: Inicializando los servicios de docker
-    service:
-    name: "{{ item }}"
-    state: started
-    enabled: yes
-    with_items: "{{ services-docker-engine }}"      
+   service:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+   with_items: "{{ services_docker_engine }}"      
     
-  - name: Installing required packages
-    dnf:
-    name: "{{ packages }}"
-    disable_excludes:  "{{ packages-disable-excludes }}"
-    state: present
+ - name: Configurando el repositorio de kubernetes
+   shell: "{{ kubernetes_repo }}"
+    
+ - name: Instalando Kubernetes
+   dnf:
+     name: "{{ packages }}"
+     disable_excludes:  "{{ packages_disable_excludes }}"
+     state: present
         
-- name: Inicializando los servicios
+  - name: Inicializando los servicios
     service:
-    name: "{{ item }}"
-    state: started
-    enabled: yes
+      name: "{{ item }}"
+      state: started
+      enabled: yes
     with_items: "{{ services }}"   

@@ -1,0 +1,15 @@
+---
+- hosts: kubernetes-master-nodes
+  become: yes
+  vars_files:
+    - "group_vars/env_calico.yaml"
+  tasks:
+  
+  - name: Instalando el operador de Tigera
+    shell: kubectl create -f "{{ url_tigera }}"
+
+  - name: Obteniendo el fichero de definicion de calico
+    shell: wget ""{{ url_calico }}"
+
+  - name: Instalamos calico
+    shell: kubectl apply -f custom-resources.yaml

@@ -2,15 +2,15 @@
 - hosts: kubernetes-master-nodes
   become: yes
   vars_files:
-    - "group_vars/env_vars.yaml"
+    - "group_vars/env_master.yaml"
   tasks:
   
   - name: Abre los puertos en el firewall
     firewalld:
-     port: "{{ item }}"
-     state: enabled
-     permanent: yes
-     immediate: yes
+      port: "{{ item }}"
+      state: enabled
+      permanent: yes
+      immediate: yes
     with_items: "{{ master_ports }}"
     
   - name: Configuramos kudeadm
@@ -18,27 +18,22 @@
     
   - name: Configura reglas de acceso en el firewall para los workers
     firewalld:
-    rich_rule: rule family=ipv4 source address=192.168.1.111/32 accept
-    permanent: yes
-    state: enabled
-    with_items: "{{ master_ports }}"
+      rich_rule: "rule family=ipv4 source address={{item.ansible_host}}/32 accept"
+      permanent: yes
+      state: enabled
+      with_items: "{{ kubernetes-worker-nodes }}"
     
+  - name: Permitimos el acceso de los contenedores a localhost
+    firewalld:
+      rich_rule: "rule family=ipv4 source address={{item.ansible_host}}/32 accept"
+      permanent: yes
+      state: enabled
+      zone: public
     
+  - name: Instalamos el plugin CNI
+    shell: kubeadm init --pod-network-cidr 192.169.0.0/16
     
-     port: "{{ item }}"
-     state: enabled
-     permanent: yes
-     immediate: yes
-    with_items: "{{ master_ports }}"
-    
-    
-    
-    
-    
-    [root@master ~]# firewall-cmd --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.1.111/32 accept'
-success
-[root@master ~]# firewall-cmd --permanent --add-rich-rule 'rule family=ipv4 source address=192.168.1.112/32 accept'
-success
-[root@master ~]# firewall-cmd --reload
-success
-[root@master ~]
+  - name: Finalizando la configuracion
+    shell:
+      - mkdir -p /root/.kube
+      - chown $(id -u):$(id -g) /root/.kube/config
