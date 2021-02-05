@@ -10,14 +10,17 @@
     shell: kubectl create -f "{{ url_tigera }}"
 
   - name: Obteniendo el fichero de definicion de calico
-    shell: wget ""{{ url_calico }}"
+    get_url:
+      url: "{{ url_calico }}"
+      dest: .
     
-  - name: Cambioamos el cidr para que coincida con el nuestro
+  - name: Cambiamos el cidr para que coincida con el nuestro
     lineinfile:
       dest: custom-resources.yaml
-      regexp: 'cidr: 192.169.0.0/16"  
-      line: "     cidr: "{{ cidr }}$"
-      state: present  
+      regexp: "cidr: 192.168.0.0\/16$"  
+      line: "     cidr: {{ cidr }}"
+      state: present
+      backrefs: yes
 
   - name: Instalamos calico
     shell: kubectl apply -f custom-resources.yaml

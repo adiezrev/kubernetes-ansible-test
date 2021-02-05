@@ -34,17 +34,14 @@
     shell: kubeadm reset -f
     
   - name: Instalamos el plugin CNI
-    shell: kubeadm init --pod-network-cidr {{ cidr }}
+    shell: kubeadm init --pod-network-cidr "{{ cidr }}"
     
   - name: Crea el directorio para la configuracion
     file:
       path: /root/.kube
       state: directory
     
-  - name: Vuelca el fichero de administracion al directorio creado
-    copy:
-      src: /etc/kubernetes/admin.conf
-      dest: /root/.kube/config
-    
   - name: Finalizando la configuracion
-    shell: chown $(id -u):$(id -g) /root/.kube/config
+    shell: |
+      cp -i /etc/kubernetes/admin.conf /root/.kube/config
+      chown $(id -u):$(id -g) /root/.kube/config

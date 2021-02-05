@@ -1,9 +1,0 @@
----
-
-- name: Configurar nodo master
-  hosts: kubernetes-worker-nodes
-  vars_files:
-    - "group_vars/preconfigure.yaml"  
-  gather_facts: false
-  roles:
-    - preconfigure
