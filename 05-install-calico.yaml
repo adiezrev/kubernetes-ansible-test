@@ -2,6 +2,7 @@
 - hosts: kubernetes-master-nodes
   become: yes
   vars_files:
+    - "group_vars/env_master.yaml"
     - "group_vars/env_calico.yaml"
   tasks:
   
@@ -10,6 +11,13 @@
 
   - name: Obteniendo el fichero de definicion de calico
     shell: wget ""{{ url_calico }}"
+    
+  - name: Cambioamos el cidr para que coincida con el nuestro
+    lineinfile:
+      dest: custom-resources.yaml
+      regexp: 'cidr: 192.169.0.0/16"  
+      line: "     cidr: "{{ cidr }}$"
+      state: present  
 
   - name: Instalamos calico
     shell: kubectl apply -f custom-resources.yaml

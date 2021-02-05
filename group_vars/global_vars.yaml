@@ -14,8 +14,7 @@ packages:
 - kubeadm
 - kubectl
 
-packages_disable_excludes:
-- kubernetes
+packages_disable_excludes: kubernetes
 
 services:
 - kubelet

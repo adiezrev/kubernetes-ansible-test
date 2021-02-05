@@ -8,7 +8,7 @@
     shell: 
        dnf update -y
   - name: Configuracion de la sincronizacion horaria
-    shell: 
+    shell: |
        timedatectl set-timezone Europe/Madrid
        dnf install chrony -y
        systemctl enable chronyd
@@ -16,9 +16,7 @@
        timedatectl set-ntp true
     
   - name: Se desactiva SELinux
-    shell:
-      sed -i s/=enforcing/=disabled/g /etc/selinux/config
+    shell: sed -i s/=enforcing/=disabled/g /etc/selinux/config
       
   - name: Instalanbdo otros paquetes
-    shell:
-      dnf install nfs-utils nfs4-acl-tools wget -y
+    shell: dnf install nfs-utils nfs4-acl-tools wget -y

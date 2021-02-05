@@ -18,22 +18,33 @@
     
   - name: Configura reglas de acceso en el firewall para los workers
     firewalld:
-      rich_rule: "rule family=ipv4 source address={{item.ansible_host}}/32 accept"
+      rich_rule: "rule family=ipv4 source address={{hostvars[item].ansible_host}}/32 accept"
       permanent: yes
       state: enabled
-      with_items: "{{ kubernetes-worker-nodes }}"
+    with_items: "{{ groups['kubernetes-worker-nodes'] }}"
     
   - name: Permitimos el acceso de los contenedores a localhost
     firewalld:
-      rich_rule: "rule family=ipv4 source address={{item.ansible_host}}/32 accept"
+      rich_rule: "rule family=ipv4 source address={{localhost_adress}} accept"
       permanent: yes
       state: enabled
       zone: public
     
+  - name: Reseteando kubeadmin
+    shell: kubeadm reset -f
+    
   - name: Instalamos el plugin CNI
-    shell: kubeadm init --pod-network-cidr 192.169.0.0/16
+    shell: kubeadm init --pod-network-cidr {{ cidr }}
+    
+  - name: Crea el directorio para la configuracion
+    file:
+      path: /root/.kube
+      state: directory
+    
+  - name: Vuelca el fichero de administracion al directorio creado
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /root/.kube/config
     
   - name: Finalizando la configuracion
-    shell:
-      - mkdir -p /root/.kube
-      - chown $(id -u):$(id -g) /root/.kube/config
+    shell: chown $(id -u):$(id -g) /root/.kube/config

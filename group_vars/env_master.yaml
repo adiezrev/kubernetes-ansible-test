@@ -5,3 +5,7 @@ master_ports:
 - "2379-2380/tcp"
 - "10250-10252/tcp"
 - "10255/tcp"
+
+localhost_adress: 172.17.0.0/16
+
+cidr = 192.169.0.0/16
