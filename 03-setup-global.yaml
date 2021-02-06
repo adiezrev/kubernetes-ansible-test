@@ -1,5 +1,5 @@
 ---
-- hosts: kubernetes-master-nodes:kubernetes-worker-nodes:fns-nodes
+- hosts: kubernetes-master-nodes:kubernetes-worker-nodes
   become: yes
   vars_files:
   - "group_vars/env_global.yaml"
