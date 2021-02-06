@@ -7,7 +7,7 @@
   tasks:
   
   - name: Instalando el operador de Tigera
-    shell: kubectl create -f "{{ url_tigera }}"
+    shell: kubectl apply -f "{{ url_tigera }}"
 
   - name: Obteniendo el fichero de definicion de calico
     get_url:
@@ -17,8 +17,8 @@
   - name: Cambiamos el cidr para que coincida con el nuestro
     lineinfile:
       dest: custom-resources.yaml
-      regexp: "cidr: 192.168.0.0\/16$"  
-      line: "     cidr: {{ cidr }}"
+      regexp: 'cidr: 192.168.0.0\/16$'
+      line: "      cidr: {{ cidr }}"
       state: present
       backrefs: yes
 

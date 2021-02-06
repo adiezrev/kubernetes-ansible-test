@@ -1,0 +1,22 @@
+---
+
+- hosts: nfs-nodes
+  become: yes
+  gather_facts: false
+  vars_files:
+  - "group_vars/env_keys.yaml"
+  
+  tasks:
+  
+  - name: Comprueba si existe el fichero de claves
+    stat: 
+      path: ".ssh/id_rsa.pub"
+    register: pub_file
+  
+  - name: Crea la clave si no existen
+    shell: ssh-keygen -t rsa -b 4096 -N
+    when: not pub_file.stat.exits
+    
+  - name:
+    shell: "ssh-copy-id -i .ssh/id_rsa.pub {{ connection_user }}@{{ hostvars[item].ansible_host }}"
+    with_items: "{{ groups.all }}"

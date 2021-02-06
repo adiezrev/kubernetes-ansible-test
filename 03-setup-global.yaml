@@ -2,7 +2,7 @@
 - hosts: kubernetes-master-nodes:kubernetes-worker-nodes:fns-nodes
   become: yes
   vars_files:
-  - "group_vars/global_vars.yaml"
+  - "group_vars/env_global.yaml"
   tasks:
   
   - name: Pone la IPs a /etc/hosts

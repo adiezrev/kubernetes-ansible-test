@@ -1,22 +1,55 @@
 - hosts: nfs-nodes
   become: yes
   vars_files:
-  - group_vars/env_vars
+  - "group_vars/env_nfs"
   
   tasks:
-  - name: Actualización a ultimo nivel
-    shell: 
-       dnf update -y
-  - name: Configuracion de la sincronizacion horaria
+  
+  - name: Creando el filesystem de tipo XFS
     shell: |
-       timedatectl set-timezone Europe/Madrid
-       dnf install chrony -y
-       systemctl enable chronyd
-       systemctl start chronyd
-       timedatectl set-ntp true
-    
-  - name: Se desactiva SELinux
-    shell: sed -i s/=enforcing/=disabled/g /etc/selinux/config
+      "pvcreate {{ data_disk }}"
+      "vgcreate data_vg {{ data_disk }}"
+      lvcreate -l+2559 -n nfs_lv /dev/data_vg
+      mkfs.xfs /dev/data_vg/nfs_lv 
+  
+  - name: Creamos el punto de montaje
+    file:
+      path: /srv/nfs
+      state: directory
+  
+  - name: Incluimos a este logical volume en /etc/fstab para que se monte en los inicios de la VM:
+    shell: echo "/dev/data_vg/nfs_lv        /srv/nfs                xfs     defaults        0 0" >> /etc/fstab
+  
+  - name: Se instala el paquete NFS
+    dnf:
+      name: "{{ nfs_packages }}"
+      state: latest
+      allowerasing: yes  
       
-  - name: Instalanbdo otros paquetes
-    shell: dnf install nfs-utils nfs4-acl-tools wget -y
+  - name: Inicializando servicios nfs
+    service:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+    with_items: "{{ nfs_services }}"        
+  
+  - name: Abre el firewall para los servicios indicados
+    firewalld:
+      service: "{{ nfs_services }}"
+      state: enabled
+      permanent: yes
+      immediate: yes
+      
+   - name: Pone las filas con las ips de los que pueden acceder
+     lineinfile:
+       path: /etc/exports
+       line: "{{hostvars[item].ansible_host}}(rw,sync)"
+       create: yes
+     with_items: groups['kubernetes-worker-nodes','kubernetes-worker-nodes']
+
+  - name: Se aplica la nueva configuracion
+    shell: exportfs -r
+      
+  - name:
+    shell: "showmount -e {{hostvars[item].ansible_host}}"
+    with_items: groups['kubernetes-worker-nodes','kubernetes-worker-nodes'] 

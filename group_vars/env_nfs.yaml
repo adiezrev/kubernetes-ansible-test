@@ -1,0 +1,13 @@
+data_disk: /dev/sdb
+
+nfs_services:
+ - nfs
+ - rpc-bind
+ - mountd
+ 
+nfs_packages:
+ - nfs-utils
+ - net-tools
+ 
+nfs_services:
+ - nfs-server

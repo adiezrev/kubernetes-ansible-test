@@ -1,7 +1,7 @@
 - hosts: kubernetes-master-nodes:kubernetes-worker-nodes:fns-nodes
   become: yes
   vars_files:
-  - "group_vars/init_vars.yaml"
+  - "group_vars/env_init.yaml"
   
   tasks:
   - name: Actualización a ultimo nivel
