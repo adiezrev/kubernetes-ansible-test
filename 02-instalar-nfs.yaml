@@ -31,9 +31,12 @@
       path: /srv/nfs
       state: directory
   
-  - name: Incluimos a este logical volume en /etc/fstab para que se monte en los inicios de la VM
-    shell: echo "/dev/data_vg/nfs_lv        /srv/nfs                xfs     defaults        0 0" >> /etc/fstab
-  
+  - name: Incluimos el volumen logico en el fichero para que se monte en el arranque
+    lineinfile:
+      regexp: dev/data_vg/nfs_lv /srv/nfs xfs  defaults  0 0 
+      dest: /etc/fstab
+      line: /dev/data_vg/nfs_lv /srv/nfs xfs  defaults  0 0
+    
   - name: Se instala el paquete NFS
     dnf:
       name: "{{ nfs_packages }}"
@@ -53,20 +56,16 @@
       permanent: yes
       immediate: yes
     with_items: " {{ firewall_nfs_services }}"
-      
-  - name: Pone las filas con las ips de los que pueden acceder
+
+  - name: Se indican los host con acceso al NFS
     lineinfile:
-      path: /etc/exports
-      regexp: ""
-      line: "/srv/nfs/  {{hostvars[item].ansible_host}}(rw,sync)"
+      path: /etc/exports  
+      regexp: "/srv/nfs/ {{ hostvars[item].ansible_host }}(rw,sync)"    
+      line: "/srv/nfs/ {{ hostvars[item].ansible_host }}(rw,sync)" 
       create: yes
-    with_items: 
-       - "{{ groups['kubernetes-master-nodes'] }}"
-       - "{{ groups['kubernetes-worker-nodes'] }}"
+    with_items:
+      - "{{ groups['kubernetes-master-nodes'] }}"
+      - "{{ groups['kubernetes-worker-nodes'] }}"
 
   - name: Se aplica la nueva configuracion
     shell: exportfs -r
-      
-  - name:
-    shell: "showmount -e {{hostvars[item].ansible_host}}"
-    with_items: groups['kubernetes-worker-nodes','kubernetes-worker-nodes'] 
