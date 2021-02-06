@@ -1,0 +1,18 @@
+---
+- hosts: kubernetes-worker-nodes
+  become: yes
+  vars_files:
+  - "group_vars/env_workers.yaml"
+  tasks:
+  
+  - name: Abre los puertos en el firewall
+    firewalld:
+      port: "{{ item }}"
+      state: enabled
+      permanent: yes
+      immediate: yes
+    with_items: "{{ workers_ports }}"
+    
+  - name: Unimos el worker al cluster
+    shell: "kubeadm join {{hostvars[item].ansible_host}} --token gmk4le.8gsfpknu99k78qut --discovery-token-ca-cert-hash sha256:d2cd35c9ab95f4061aa9d9b993f7e8742b2307516a3632b27ea10b64baf8cd71"
+    with_items: groups['kubernetes-master-nodes'] 
