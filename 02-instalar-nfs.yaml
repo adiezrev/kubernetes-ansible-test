@@ -1,30 +1,43 @@
 - hosts: nfs-nodes
   become: yes
   vars_files:
-  - "group_vars/env_nfs"
+  - "group_vars/env_nfs.yaml"
   
   tasks:
+
+  - name: Creando el grupo del volumen
+    lvg:
+      pvs: "{{ data_disk }}"
+      vg: data_vg
+      state: present
+
+  - name: Creando el volumen logico
+    lvol:
+      vg: data_vg
+      lv: nfs_lv
+      size: "2559"
+      state: present
+      force: yes
   
   - name: Creando el filesystem de tipo XFS
-    shell: |
-      "pvcreate {{ data_disk }}"
-      "vgcreate data_vg {{ data_disk }}"
-      lvcreate -l+2559 -n nfs_lv /dev/data_vg
-      mkfs.xfs /dev/data_vg/nfs_lv 
+    filesystem:
+      fstype: xfs
+      dev: /dev/data_vg/nfs_lv
+      force: yes
+      resizefs: yes
   
   - name: Creamos el punto de montaje
     file:
       path: /srv/nfs
       state: directory
   
-  - name: Incluimos a este logical volume en /etc/fstab para que se monte en los inicios de la VM:
+  - name: Incluimos a este logical volume en /etc/fstab para que se monte en los inicios de la VM
     shell: echo "/dev/data_vg/nfs_lv        /srv/nfs                xfs     defaults        0 0" >> /etc/fstab
   
   - name: Se instala el paquete NFS
     dnf:
       name: "{{ nfs_packages }}"
       state: latest
-      allowerasing: yes  
       
   - name: Inicializando servicios nfs
     service:
@@ -35,17 +48,21 @@
   
   - name: Abre el firewall para los servicios indicados
     firewalld:
-      service: "{{ nfs_services }}"
+      service: "{{ item }}"
       state: enabled
       permanent: yes
       immediate: yes
+    with_items: " {{ firewall_nfs_services }}"
       
-   - name: Pone las filas con las ips de los que pueden acceder
-     lineinfile:
-       path: /etc/exports
-       line: "{{hostvars[item].ansible_host}}(rw,sync)"
-       create: yes
-     with_items: groups['kubernetes-worker-nodes','kubernetes-worker-nodes']
+  - name: Pone las filas con las ips de los que pueden acceder
+    lineinfile:
+      path: /etc/exports
+      regexp: ""
+      line: "/srv/nfs/  {{hostvars[item].ansible_host}}(rw,sync)"
+      create: yes
+    with_items: 
+       - "{{ groups['kubernetes-master-nodes'] }}"
+       - "{{ groups['kubernetes-worker-nodes'] }}"
 
   - name: Se aplica la nueva configuracion
     shell: exportfs -r

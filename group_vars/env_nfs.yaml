@@ -1,6 +1,6 @@
 data_disk: /dev/sdb
 
-nfs_services:
+firewall_nfs_services:
  - nfs
  - rpc-bind
  - mountd
