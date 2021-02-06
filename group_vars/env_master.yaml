@@ -9,3 +9,6 @@ master_ports:
 localhost_adress: 172.17.0.1/16
 
 cidr: 192.169.0.0/16
+
+# Fichero con la informacion de salida del inicio de kubernetes
+token_file: join_token

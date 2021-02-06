@@ -27,6 +27,7 @@
   - name: Edicion del fichero k8s.conf para el cortafuegos
     blockinfile:
       path: /etc/yum.repos.d/kubernetes.repo
+      create: yes
       block: |
         net.bridge.bridge-nf-call-ip6tables = 1
         net.bridge.bridge-nf-call-iptables = 1
