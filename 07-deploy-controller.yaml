@@ -1,0 +1,13 @@
+---
+- hosts: kubernetes-master-nodes
+  become: yes
+  vars_files:
+  - "group_vars/env_controller.yaml"  
+  
+  tasks:
+  
+  - name: Despliega un ingresscontroller
+    shell: kubectl apply -f "{{ url_controller }}"
+    
+  - name: Crea un namespace
+    shell: kubectl get pods --namespace="{{ controller_namespace }}"

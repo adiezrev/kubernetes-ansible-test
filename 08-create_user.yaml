@@ -1,0 +1,28 @@
+---
+- hosts: kubernetes-master-nodes
+  become: yes
+  vars_files:
+  - "group_vars/env_user.yaml"  
+  
+  tasks:
+  
+  - name: Crea un usuario
+    user:
+      name: "{{ new_user }}"
+      
+  - name: Se crea un directorio apra la configuracion
+    file:
+      path: /home/"{{ new_user }}".kube
+      state: directory     
+      
+  - name: Se crea un directorio apra la configuracion
+    shell: cp -i /etc/kubernetes/admin.conf /home/"{{ new_user }}"/.kube/config
+    
+  - name: Se crea un directorio para la configuracion
+    shell: chown "{{ new_user }}". /home/"{{ new_user }}"/.kube/config
+
+  - name: Configuramos para que no pida clave
+    blockinfile:
+     path: /etc/sudoers.d/"{{ new_user }}"
+     block: |
+      ALL            ALL = (ALL) NOPASSWD: ALL

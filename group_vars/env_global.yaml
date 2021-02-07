@@ -2,9 +2,13 @@
 
 repo: https://download.docker.com/linux/centos/docker-ce.repo
 
+packages_with_conflicts_docker_engine:
+- buildah
+- podman
+
 packages_docker_engine:
-- docker-ce-19.03.14-3.el8 
 - containerd.io
+- docker-ce-19.03.14-3.el8 
 
 services_docker_engine:
 - docker

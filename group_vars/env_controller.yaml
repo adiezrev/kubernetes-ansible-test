@@ -1,0 +1,4 @@
+# url para otbener el controller
+url_controller: https://raw.githubusercontent.com/haproxytech/kubernetes-ingress/v1.5/deploy/haproxy-ingress.yaml
+#namespacxe
+controller_namespace: haproxy-controller

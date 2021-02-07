@@ -4,11 +4,7 @@
   vars_files:
   - "group_vars/env_master.yaml"
   - "group_vars/env_workers.yaml"
-  
-  vars:
-    input : "{{ lookup('template', '/tmp/httpd.conf') }}"
-    target: "{{ input | regex_replace('\\sSSLFile\\s*(.*)', '\\1')}}"
-  
+ 
   tasks:
   
   - name: Abre los puertos en el firewall
@@ -19,14 +15,15 @@
       immediate: yes
     with_items: "{{ workers_ports }}"
     
-  - name: Obtenemos el token
-    shell: "cat {{ join_token }} | grep -e '\-\-token.*[^]" -o
-    register: token
+  #- name: Obtenemos el token
+  #  shell: cat "{{ token_file }}" | grep -e '\-\-token\s[^\s]*' -o
+  #  register: token
+  #  become: no
     
-  - name: Obtenemos el discovery token
-    shell: "cat {{ join_token }} | grep -e '\-\-discovery-token-ca-cert-hash.*$"
-    register: discovery_token    
+  #- name: Obtenemos el discovery token
+  #  shell: cat "{{ token_file }}" | grep -e '\-\-discovery-token-ca-cert-hash.*$'
+  #  register: discovery_token    
+  #  become: no
     
   - name: Unimos el worker al cluster
-    shell: "kubeadm join {{hostvars[item].ansible_host}} --token {{ output.stdout} } {{ discovery_token.stdout }}"
-    with_items: groups['kubernetes-master-nodes'] 
+    shell: cat "{{ token_file }}" | tail -2

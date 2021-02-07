@@ -30,8 +30,8 @@
       state: enabled
       zone: public
     
-  #- name: Reseteando kubeadmin
-   # shell: kubeadm reset -f
+  - name: Reseteando kubeadmin
+    shell: kubeadm reset -f
     
   - name: Instalamos el plugin CNI
     shell: kubeadm init --pod-network-cidr "{{ cidr }}"
@@ -39,6 +39,7 @@
     
   - name: Se guarda la informacion para su uso posterior
     local_action: "copy content={{ output.stdout }} dest={{ token_file }}"
+    become: no
     
   - name: Crea el directorio para la configuracion
     file:

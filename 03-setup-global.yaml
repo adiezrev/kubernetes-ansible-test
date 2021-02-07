@@ -44,12 +44,16 @@
       regexp: '(^/.*swap*)'
       replace: '# \1'
 
+  - name: Eliminamos en caso de que existan podman y buildah, ya que dan problemas de versiones con docker-ce
+    dnf:
+      name: "{{ packages_with_conflicts_docker_engine }}"
+      state: absent
+
   - name: Instalamos docker que será el engine para ejecutar contenedores.
     dnf:
       name: "{{ packages_docker_engine }}"
       enablerepo: "{{ repo }}"
       state: latest
-      allowerasing: yes
     
   - name: Inicializando los servicios de docker
     service:
